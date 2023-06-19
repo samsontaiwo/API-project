@@ -9,7 +9,7 @@ if (process.env.NODE_ENV === "production") {
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable(
-      "Users",
+      "Reviews",
       {
         id: {
           allowNull: false,
@@ -17,27 +17,27 @@ module.exports = {
           primaryKey: true,
           type: Sequelize.INTEGER,
         },
-        firstName: {
-          type: Sequelize.STRING(30),
+        spotId: {
+          type: Sequelize.INTEGER,
           allowNull: false,
+          references: {
+            model: "Spots",
+          },
+          onDelete: "CASCADE",
         },
-        lastName: {
-          type: Sequelize.STRING(30),
+        userId: {
+          type: Sequelize.INTEGER,
           allowNull: false,
+          references: {
+            model: "Users",
+          },
+          onDelete: "CASCADE",
         },
-        username: {
-          type: Sequelize.STRING(30),
-          allowNull: false,
-          unique: true,
+        review: {
+          type: Sequelize.TEXT,
         },
-        email: {
-          type: Sequelize.STRING(50),
-          allowNull: false,
-          unique: true,
-        },
-        hashedPassword: {
-          type: Sequelize.STRING.BINARY,
-          allowNull: false,
+        stars: {
+          type: Sequelize.INTEGER,
         },
         createdAt: {
           allowNull: false,
@@ -53,8 +53,8 @@ module.exports = {
       options
     );
   },
-  async down(queryInterface, Sequelize) {
-    options.tableName = "Users";
-    await queryInterface.dropTable(options);
+  down: async (queryInterface, Sequelize) => {
+    options.tableName = "Reviews";
+    return queryInterface.dropTable(options);
   },
 };
