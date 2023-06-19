@@ -81,6 +81,21 @@ const validSpot = ({
   };
 };
 
+const validReview = ({ review, stars }) => {
+  const container = { status: 400, message: "Bad Request", errors: {} };
+  if (!review || review.trim() === "") {
+    container.errors.review = "Review text is required";
+  }
+  if (!stars || stars > 5 || stars < 1 || !Number.isInteger(stars)) {
+    container.errors.stars = "Stars must be an integer from 1 to 5";
+  }
+  throwIfError(container);
+  return {
+    review,
+    stars,
+  };
+};
+
 const validBooking = async (startDate, endDate, spotId, bookingId) => {
   const container = { status: 400, message: "Bad Request", errors: {} };
   if (!endDate) {
@@ -231,6 +246,7 @@ const validQuery = ({
 module.exports = {
   handleValidationErrors,
   validSpot,
+  validReview,
   validBooking,
   validQuery
 };
