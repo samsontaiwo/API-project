@@ -81,7 +81,53 @@ const validSpot = ({
   };
 };
 
-// 
+const validBooking = async (startDate, endDate, spotId, bookingId) => {
+  const container = { status: 400, message: "Bad Request", errors: {} };
+  if (!endDate) {
+    container.errors.endDate = "Provide endDate";
+  }
+  if (!startDate) {
+    container.errors.startDate = "Provide startDate";
+  }
+  throwIfError(container);
+
+  if (startDate >= endDate) {
+    container.errors.endDate = "endDate cannot be on or before startDate";
+    throw container;
+  }
+
+  let where = { spotId };
+  if (bookingId) {
+    where = { spotId, [Op.not]: bookingId };
+  }
+  const bookings = await Booking.findAll({ where });
+
+  container.message =
+    "Sorry, this spot is already booked for the specified dates";
+  container.status = 403;
+
+  for (let booking of bookings) {
+    const startDateConflict =
+      startDate >= booking.startDate && startDate <= booking.endDate;
+    const endDateConflict =
+      endDate >= booking.startDate && endDate <= booking.endDate;
+    const bothDateConflict =
+      endDate >= booking.endDate && startDate <= booking.startDate;
+    if (startDateConflict) {
+      container.errors.startDate =
+        "Start date conflicts with an existing booking";
+    }
+    if (endDateConflict) {
+      container.errors.endDate = "End date conflicts with an existing booking";
+    }
+    if (bothDateConflict) {
+      container.errors.startDate =
+        "Start date conflicts with an existing booking";
+      container.errors.endDate = "End date conflicts with an existing booking";
+    }
+    throwIfError(container);
+  }
+};
 const setOptions = ({
   page,
   size,
@@ -185,5 +231,6 @@ const validQuery = ({
 module.exports = {
   handleValidationErrors,
   validSpot,
+  validBooking,
   validQuery
 };
